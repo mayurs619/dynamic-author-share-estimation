@@ -1,0 +1,18 @@
+{
+"weights": {
+    "conceptualization": 150,
+    "writing_original_draft": 150,
+    "formal_analysis": 120,
+    "methodology": 110,
+    "investigation": 100,
+    "software": 90,
+    "data_curation": 70,
+    "visualization": 60,
+    "validation": 60,
+    "writing_review_editing": 50,
+    "supervision": 40,
+    "project_administration": 30,
+    "funding_acquisition": 30,
+    "resources": 30
+  }
+}
