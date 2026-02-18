@@ -182,3 +182,59 @@ def test_duplicate_alias_weights_are_merged():
         temperature=1.0,
     )
     assert model.role_weights["writing_original_draft"] == pytest.approx(15.0, abs=1e-12)
+
+def test_softmax_matches_manual_formula_temperature_1():
+    logits = [1.2, -0.7, 0.0]
+    probs = softmax(logits, temperature=1.0) 
+
+    exps = [math.exp(z) for z in logits]
+    denom = sum(exps)
+    expected = [e / denom for e in exps]
+
+    assert probs == pytest.approx(expected, rel=1e-12, abs=1e-12)
+
+
+def test_softmax_matches_manual_formula_with_temperature():
+    logits = [2.0, 0.0, -1.0]
+    T = 2.5
+    probs = softmax(logits, temperature=T)
+
+    exps = [math.exp(z / T) for z in logits]
+    denom = sum(exps)
+    expected = [e / denom for e in exps]
+
+    assert probs == pytest.approx(expected, rel=1e-12, abs=1e-12)
+
+
+def test_softmax_shift_invariance():
+    # softmax(z) == softmax(z + c)
+    logits = [0.3, 1.1, -2.0, 4.5]
+    c = 123.456
+    p1 = softmax(logits, temperature=1.0)
+    p2 = softmax([z + c for z in logits], temperature=1.0)
+
+    assert p1 == pytest.approx(p2, rel=1e-12, abs=1e-12)
+
+
+def test_softmax_two_class_closed_form():
+    # For two classes: p1 = 1 / (1 + exp((z2-z1)/T))
+    z1, z2 = 3.0, 1.0
+    T = 0.8
+    probs = softmax([z1, z2], temperature=T)
+
+    expected_p1 = 1.0 / (1.0 + math.exp((z2 - z1) / T))
+    expected_p2 = 1.0 - expected_p1
+
+    assert probs[0] == pytest.approx(expected_p1, rel=1e-12, abs=1e-12)
+    assert probs[1] == pytest.approx(expected_p2, rel=1e-12, abs=1e-12)
+
+
+def test_softmax_monotonic_with_logit_increase():
+    logits = [0.0, 0.0, 0.0]
+    base = softmax(logits, temperature=1.0)
+    boosted = softmax([1.0, 0.0, 0.0], temperature=1.0)
+
+    # Increasing one logit should increase only its probability
+    assert boosted[0] > base[0]
+    assert boosted[1] < base[1]
+    assert boosted[2] < base[2]
