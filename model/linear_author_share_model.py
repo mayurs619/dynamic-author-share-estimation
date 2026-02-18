@@ -21,7 +21,7 @@ def normalize(points: List[float]) -> List[float]:
         return []
     return [1.0 / n] * n
 
-class AuthorShareModel:
+class LinearAuthorShareModel:
     """
     Linear, rule-based share model.
     - Aggregates weighted CRediT role contributions into per-author points.

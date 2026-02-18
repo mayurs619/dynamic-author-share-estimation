@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from model.author_share_model import AuthorShareModel
+from model.linear_author_share_model import LinearAuthorShareModel
 
 
 def assert_distribution(shares, n, tol=1e-12):
@@ -26,7 +26,7 @@ def role_weights():
 
 @pytest.fixture
 def model(role_weights):
-    return AuthorShareModel(role_weights)
+    return LinearAuthorShareModel(role_weights)
 
 
 def test_weights_file_is_production_shape(role_weights):
@@ -162,7 +162,7 @@ def test_accepts_json_string_input(model):
 
 
 def test_duplicate_alias_keys_in_weights_are_merged():
-    model_local = AuthorShareModel(
+    model_local = LinearAuthorShareModel(
         {
             "writing_original_draft": 10.0,
             "Writing - Original Draft": 5.0,
