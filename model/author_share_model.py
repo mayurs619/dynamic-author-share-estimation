@@ -51,10 +51,10 @@ class AuthorShareModel:
             payload = input_json
         
         # Read roles (must be a dict)
-        if "roles" not in payload or payload["roles"] is None:
+        if "roles" not in payload or payload["roles"] is None: # If no roles, set to empty dict
             roles_payload: Dict[str, Any] = {}
         else:
-            roles_payload = payload["roles"]
+            roles_payload = payload["roles"] # If roles, set to roles
 
         if not isinstance(roles_payload, dict):
             raise ValueError("'roles' must be a dict mapping role -> list of contributors")
@@ -62,6 +62,7 @@ class AuthorShareModel:
         # Determine author list
         all_authors = payload.get("all_authors")
 
+        # If no all_authors field in the json, infer from roles (contributors under roles)   
         if all_authors is None:
             # Infer from role contributor entries
             inferred_authors: List[str] = []
@@ -111,13 +112,13 @@ class AuthorShareModel:
                 if "author_id" not in item:
                     continue
 
-                raw_c = item.get("contribution", 0.0)
-                c = float(raw_c)
-                if c < 0.0:
-                    c = 0.0
+                raw_contribution = item.get("contribution", 1.0) # If no contribution weighting, set to 1.0 (likely the only role contributor)
+                ccontribution = float(raw_contribution)
+                if contribution < 0.0: # If contribution weighting is negative, set to 0.0
+                    contribution = 0.0
 
-                cleaned.append({"author_id": item["author_id"], "contribution": c})
-                total_contribution += c
+                cleaned.append({"author_id": item["author_id"], "contribution": contribution})
+                total_contribution += contribution
 
             if total_contribution <= 0.0:
                 continue
@@ -125,15 +126,15 @@ class AuthorShareModel:
             # Allocate this role's weight proportionally
             for item in cleaned:
                 author_id = item["author_id"]
-                c = item["contribution"]
+                contribution = item["contribution"]
 
-                if c == 0.0:
+                if contribution == 0.0:
                     continue
-                if author_id not in author_index:
+                if author_id not in author_index: # If author_id not in author_index, skip
                     continue
 
                 idx = author_index[author_id]
-                points[idx] += weight * (c / total_contribution)
+                points[idx] += weight * (contribution / total_contribution)
         
         return normalize(points)
 
