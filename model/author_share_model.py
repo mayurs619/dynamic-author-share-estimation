@@ -43,7 +43,10 @@ class AuthorShareModel:
             payload = input_json
 
         # Read roles (must be a dict)
-        roles_payload_raw = payload.get("roles") or {}
+        if "roles" not in payload or payload["roles"] is None:
+            roles_payload_raw = {}
+        else:
+            roles_payload_raw = payload["roles"]
         if not isinstance(roles_payload_raw, dict):
             raise ValueError("'roles' must be a dict mapping role -> list of contributors")
 
