@@ -1,0 +1,52 @@
+{
+    "title": "Author Share Input",
+    "type": "object",
+    "required": ["roles"],
+    "additionalProperties": false,
+    "properties": {
+      "all_authors": {
+        "type": "array",
+        "description": "The list of all authors. Optional. If omitted, model infers authors from roles.",
+        "items": { "type": "string", "minLength": 1 },
+        "minItems": 1,
+        "uniqueItems": true
+      },
+      "roles": {
+        "type": "object",
+        "description": "Role name -> list of contributors. Role keys can be snake_case or CRediT title aliases handled in model.",
+        "additionalProperties": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["author_id"],
+                "additionalProperties": true,
+                "properties": {
+                  "author_id": { "type": "string", "minLength": 1 },
+                  "contribution": {
+                    "type": "number",
+                    "default": 1.0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "missing_credit": {
+        "type": "object",
+        "description": "Optional metadata for incomplete CRediT capture.",
+        "additionalProperties": false,
+        "properties": {
+          "is_incomplete": { "type": "boolean" },
+          "missing_roles": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
